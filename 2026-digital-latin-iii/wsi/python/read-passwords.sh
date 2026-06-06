@@ -1,0 +1,2 @@
+read -s -p "DB Password? " MARIADB_ALIM_PHP7_PSW
+export MARIADB_ALIM_PHP7_PSW
