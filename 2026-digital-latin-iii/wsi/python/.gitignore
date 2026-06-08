@@ -1,2 +1,3 @@
 venv-py3x64/
 workspace/
+*.bz2
