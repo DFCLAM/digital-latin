@@ -13,9 +13,9 @@ from pathlib import Path
 # 1. Generate synthetic high-dimensional data
 # X, y = make_blobs(n_samples=50, centers=3, n_features=4, random_state=42)
 
-term = 'maneries'
+term = 'appositio'
 
-bert_result_json_path = Path(__file__).parent / 'workspace/bert/bert_search_term__maneries.json'
+bert_result_json_path = Path(__file__).parent / f'workspace/bert/bert_search_term__{term}.json'
 with bert_result_json_path.open('r') as fp:
     bert_result = json.load(fp)
 
@@ -26,7 +26,7 @@ for document_key, document in bert_result.items():
         for term_index in sentence['term_indexes']:
             bert = sentence['embeddings'][term_index]
             if bert['token'] != term:
-                raise Exception('assertion error')
+                raise Exception('assertion error: ' + bert['token'] + ' != ' + term)
             embeddings.append(bert['embedding'])
             labels.append(re.search(r'\d+', document_key).group() + '_' + str(sentence['index']) + '_' + str(term_index))
 
