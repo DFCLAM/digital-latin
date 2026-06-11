@@ -10,10 +10,12 @@ import json
 import re
 from pathlib import Path
 
-def plot_clusters(terms : list[str]):
-    prefix = f'workspace/bert/bert_search_term__{"-".join(terms)}'
+def plot_clusters(terms : list[str], use_cls : bool = False):
+    base = 'workspace/bert/'
+    prefix = f'bert_search_term__{"-".join(terms)}'
+    suffix = '_use_cls' if use_cls else ''
     print (f'Plotting for {prefix}')
-    bert_result_json_path = Path(__file__).parent / f'{prefix}.json'
+    bert_result_json_path = Path(__file__).parent / f'{base}{prefix}.json'
     with bert_result_json_path.open('r') as fp:
         bert_result = json.load(fp)
 
@@ -27,9 +29,14 @@ def plot_clusters(terms : list[str]):
 
                 sample_uid = re.search(r'\d+', document_key).group() + '_' + str(sentence['index']) + '_' + str(term_index)
 
-                bert = sentence['embeddings'][term_index]
-                if not bert['token'] in terms:
-                    raise Exception('assertion error: ' + bert['token'] + ' not in (' + ','.join(terms) + ')')
+                if use_cls:
+                    bert = sentence['embeddings'][0]
+                    if not bert['token'] == '[CLS]':
+                        raise Exception('assertion error: ' + bert['token'] + ' != \'[CLS]\'')
+                else:
+                    bert = sentence['embeddings'][term_index]
+                    if not bert['token'] in terms:
+                        raise Exception('assertion error: ' + bert['token'] + ' not in (' + ','.join(terms) + ')')
                 embeddings.append(bert['embedding'])
 
                 left_context = []
@@ -38,7 +45,8 @@ def plot_clusters(terms : list[str]):
                     left_context.append(sentence['embeddings'][index]['token'])
                 for index in range(term_index + 1, min(len(sentence['embeddings']), term_index + context_max_size + 1)):
                     right_context.append(sentence['embeddings'][index]['token'])
-                plot_labels.append(f'{sample_uid:<16}:   {" ".join(left_context)} *{bert['token']}* {" ".join(right_context)}')
+                plot_labels.append(f'{sample_uid:<16}:   {" ".join(left_context)} *{sentence['embeddings'][term_index]['token']}* {" ".join(right_context)}')
+                # print(f'{sample_uid:<16}:   {" ".join(left_context)} *{sentence['embeddings'][term_index]['token']}* {" ".join(right_context)}')
 
     X = np.array(embeddings)
 
@@ -55,8 +63,8 @@ def plot_clusters(terms : list[str]):
     plt.xlabel("Sample Index")
     plt.ylabel("Distance")
     plt.tight_layout()
-    plt.savefig(f'{prefix}.svg')
-    plt.savefig(f'{prefix}.png')
+    plt.savefig(f'{base}plots/{prefix}{suffix}.svg')
+    plt.savefig(f'{base}plots/{prefix}{suffix}.png')
     # plt.show()
 
 """
@@ -69,10 +77,19 @@ for label_index, label in enumerate(labels):
 # terms = ['appositio']
 # terms = ['appositio','appositione','appositionem','appositiones','appositionibus']
 # terms = ['maneries','maneriei','maneriebus']
-for term in ['appositio','appositione','appositionem','appositiones','appositionibus','maneries','maneriei','maneriebus']:
+use_cls = False
+for term in ['appositio','appositione','appositionem','appositiones','appositionibus',
+             'maneries','maneriei','maneriebus',
+             'mutatio','mutatione','mutationem','mutationes',
+             'terminatio','terminationes','terminatione','terminationem','terminationibus','terminationis',
+             'dispositio','dispositione','dispositionem','dispositionis','dispositiones','dispositionibus',
+             'prologus','prologum','prologi',
+             'dictamen','dictaminis','dictamine','dictaminum','dictaminibus',
+             'color','colore','colores','coloris','coloribus','colorem','colorum',
+             'modo','modum','modis','modus','modi','modos','modorum',
+             ]:
     try:
-        plot_clusters([term])
+        plot_clusters([term], use_cls)
     except Exception as e:
         print (e)
 
-plot_clusters(['appositio','appositione','appositionem','appositiones','appositionibus'])
