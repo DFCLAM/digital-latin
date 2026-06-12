@@ -10,10 +10,16 @@ import re
 from pathlib import Path
 
 def plot_clusters(terms : list[str], max_samples_size : int = 0, use_cls : bool = False):
-    base = str((Path(__file__).parent.parent / 'workspace/bert/').absolute())
+
+    base = str((Path(__file__).parent.parent / 'workspace/bert/').absolute()) + '/'
     prefix = f'bert_search_term__{"-".join(terms)}'
     suffix = '_use_cls' if use_cls else ''
     suffix = f'_{max_samples_size}-sample' if max_samples_size else ''
+
+    if Path(f'{base}plots/{prefix}{suffix}.svg').exists():
+        print (f'Skipping {prefix}')
+        return
+
     print (f'Plotting for {prefix}')
     bert_result_json_path = Path(__file__).parent / f'{base}{prefix}.json'
     with bert_result_json_path.open('r') as fp:
@@ -52,17 +58,23 @@ def plot_clusters(terms : list[str], max_samples_size : int = 0, use_cls : bool 
     # print(len(X))
     # for index, sample in enumerate(X):
     #     print (index, sample[:5])
-    if max_samples_size:
+    # print (len(X), max_samples_size)
+    if max_samples_size and (len(X) > max_samples_size):
         indices = np.random.choice(len(X), max_samples_size, replace=False)
         X = X[indices]
-        print(plot_labels)
-        plot_labels = np.array(plot_labels) # to avoid "only integer scalar arrays can be converted to a scalar index"
-        plot_labels = plot_labels[indices].tolist()
-        print(plot_labels)
-        print()
-        print(len(X))
-        for index, sample in enumerate(X):
-            print (index, sample[:5])
+        # print(plot_labels)
+        plot_labels = np.array(plot_labels)[indices].tolist() # to avoid "only integer scalar arrays can be converted to a scalar index"
+        # print(plot_labels)
+        # print()
+        # print(len(X))
+        # for index, sample in enumerate(X):
+            # print (index, sample[:5])
+    else:
+        # orribile ma ora non ho tempo
+        suffix = '_use_cls' if use_cls else '' 
+        if Path(f'{base}plots/{prefix}{suffix}.svg').exists():
+            print (f'Skipping {prefix}')
+            return
 
     # setting distance_threshold=0 ensures we compute the full tree.
     plot_title = f'Agglomerative Clustering Dendrogram - {", ".join(terms)}'
@@ -81,20 +93,20 @@ def plot_clusters(terms : list[str], max_samples_size : int = 0, use_cls : bool 
     plt.savefig(f'{base}plots/{prefix}{suffix}.png', dpi = 300)
     # plt.show()
 
-max_samples_size = 50
+max_samples_size = 30
 use_cls = False
-# for term in ['appositio','appositione','appositionem','appositiones','appositionibus',
-#              'maneries','maneriei','maneriebus',
-#              'mutatio','mutatione','mutationem','mutationes',
-#              'terminatio','terminationes','terminatione','terminationem','terminationibus','terminationis',
-#              'dispositio','dispositione','dispositionem','dispositionis','dispositiones','dispositionibus',
-#              'prologus','prologum','prologi',
-#              'dictamen','dictaminis','dictamine','dictaminum','dictaminibus',
-#              'color','colore','colores','coloris','coloribus','colorem','colorum',
-#              'modo','modum','modis','modus','modi','modos','modorum',
-#              ]:
-#     try:
-#         plot_clusters([term], use_cls)
-#     except Exception as e:
-#         print (e)
-plot_clusters(['dispositio'], 50)
+for term in ['appositio','appositione','appositionem','appositiones','appositionibus',
+             'maneries','maneriei','maneriebus',
+             'mutatio','mutatione','mutationem','mutationes',
+             'terminatio','terminationes','terminatione','terminationem','terminationibus','terminationis',
+             'dispositio','dispositione','dispositionem','dispositionis','dispositiones','dispositionibus',
+             'prologus','prologum','prologi',
+             'dictamen','dictaminis','dictamine','dictaminum','dictaminibus',
+             'color','colore','colores','coloris','coloribus','colorem','colorum',
+            #  'modo','modum','modis','modus','modi','modos','modorum',
+             ]:
+    try:
+        plot_clusters([term], max_samples_size, use_cls)
+    except Exception as e:
+        print (e)
+# plot_clusters(['dispositio'], 50)
