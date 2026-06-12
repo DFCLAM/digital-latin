@@ -9,10 +9,11 @@ import json
 import re
 from pathlib import Path
 
-def plot_clusters(terms : list[str], use_cls : bool = False):
-    base = 'workspace/bert/'
+def plot_clusters(terms : list[str], max_samples_size : int = 0, use_cls : bool = False):
+    base = str((Path(__file__).parent.parent / 'workspace/bert/').absolute())
     prefix = f'bert_search_term__{"-".join(terms)}'
     suffix = '_use_cls' if use_cls else ''
+    suffix = f'_{max_samples_size}-sample' if max_samples_size else ''
     print (f'Plotting for {prefix}')
     bert_result_json_path = Path(__file__).parent / f'{base}{prefix}.json'
     with bert_result_json_path.open('r') as fp:
@@ -48,6 +49,20 @@ def plot_clusters(terms : list[str], use_cls : bool = False):
                 # print(f'{sample_uid:<16}:   {" ".join(left_context)} *{sentence['embeddings'][term_index]['token']}* {" ".join(right_context)}')
 
     X = np.array(embeddings)
+    # print(len(X))
+    # for index, sample in enumerate(X):
+    #     print (index, sample[:5])
+    if max_samples_size:
+        indices = np.random.choice(len(X), max_samples_size, replace=False)
+        X = X[indices]
+        print(plot_labels)
+        plot_labels = np.array(plot_labels) # to avoid "only integer scalar arrays can be converted to a scalar index"
+        plot_labels = plot_labels[indices].tolist()
+        print(plot_labels)
+        print()
+        print(len(X))
+        for index, sample in enumerate(X):
+            print (index, sample[:5])
 
     # setting distance_threshold=0 ensures we compute the full tree.
     plot_title = f'Agglomerative Clustering Dendrogram - {", ".join(terms)}'
@@ -63,32 +78,23 @@ def plot_clusters(terms : list[str], use_cls : bool = False):
     plt.ylabel("Distance")
     plt.tight_layout()
     plt.savefig(f'{base}plots/{prefix}{suffix}.svg')
-    plt.savefig(f'{base}plots/{prefix}{suffix}.png')
+    plt.savefig(f'{base}plots/{prefix}{suffix}.png', dpi = 300)
     # plt.show()
 
-"""
-labels = fcluster(Z, t=2, criterion='maxclust')
-assert len(plot_labels) == len(labels)
-for label_index, label in enumerate(labels):
-    print (f'{plot_labels[label_index]} : {labels[label_index]}')
-"""
-
-# terms = ['appositio']
-# terms = ['appositio','appositione','appositionem','appositiones','appositionibus']
-# terms = ['maneries','maneriei','maneriebus']
+max_samples_size = 50
 use_cls = False
-for term in ['appositio','appositione','appositionem','appositiones','appositionibus',
-             'maneries','maneriei','maneriebus',
-             'mutatio','mutatione','mutationem','mutationes',
-             'terminatio','terminationes','terminatione','terminationem','terminationibus','terminationis',
-             'dispositio','dispositione','dispositionem','dispositionis','dispositiones','dispositionibus',
-             'prologus','prologum','prologi',
-             'dictamen','dictaminis','dictamine','dictaminum','dictaminibus',
-             'color','colore','colores','coloris','coloribus','colorem','colorum',
-             'modo','modum','modis','modus','modi','modos','modorum',
-             ]:
-    try:
-        plot_clusters([term], use_cls)
-    except Exception as e:
-        print (e)
-
+# for term in ['appositio','appositione','appositionem','appositiones','appositionibus',
+#              'maneries','maneriei','maneriebus',
+#              'mutatio','mutatione','mutationem','mutationes',
+#              'terminatio','terminationes','terminatione','terminationem','terminationibus','terminationis',
+#              'dispositio','dispositione','dispositionem','dispositionis','dispositiones','dispositionibus',
+#              'prologus','prologum','prologi',
+#              'dictamen','dictaminis','dictamine','dictaminum','dictaminibus',
+#              'color','colore','colores','coloris','coloribus','colorem','colorum',
+#              'modo','modum','modis','modus','modi','modos','modorum',
+#              ]:
+#     try:
+#         plot_clusters([term], use_cls)
+#     except Exception as e:
+#         print (e)
+plot_clusters(['dispositio'], 50)
