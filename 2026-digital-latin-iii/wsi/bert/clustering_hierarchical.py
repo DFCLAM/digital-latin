@@ -1,10 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
-from sklearn.cluster import AgglomerativeClustering
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
-
 import json
 import re
 from pathlib import Path

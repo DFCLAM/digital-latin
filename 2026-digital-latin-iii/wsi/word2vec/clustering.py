@@ -1,3 +1,5 @@
-from pathlib import Path
 
-workspace_path = Path(__file__).parent.parent / 'workspace'
+from training import ALIMSentencesRestartableGenerator
+
+for item in ALIMSentencesRestartableGenerator(True, True):
+    print (item)
