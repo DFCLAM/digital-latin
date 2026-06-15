@@ -73,5 +73,7 @@ if __name__ == "__main__":
 
     # model = Word2Vec(sentences=ALIMSentencesRestartableGenerator(use_lemmas=False), vector_size=100, window=20, sample=1e-3, workers=8, sg=1)
     # model.save(str((workspace_path / "word2vec/word2vec_forms.model").absolute()))
-    model = Word2Vec(sentences=ALIMSentencesRestartableGenerator(use_lemmas=True), vector_size=100, window=20, sample=1e-3, workers=8, sg=1)
-    model.save(str((workspace_path / "word2vec/word2vec_lemmata.model").absolute()))
+    # model = Word2Vec(sentences=ALIMSentencesRestartableGenerator(use_lemmas=True), vector_size=100, window=20, sample=1e-3, workers=8, sg=1)
+    # model.save(str((workspace_path / "word2vec/word2vec_lemmata.model").absolute()))
+    model = Word2Vec(sentences=ALIMSentencesRestartableGenerator(use_lemmas=True), vector_size=200, window=20, sample=1e-3, workers=8, sg=0)
+    model.save(str((workspace_path / "word2vec/word2vec_cbow_lemmata.model").absolute()))
